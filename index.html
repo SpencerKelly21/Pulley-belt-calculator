@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Belt drive sketch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#eef3f7;--grid:#d2dde6;--panel:#fbfdff;--ink:#12304a;--mute:#5b7388;--line:#c5d2dd;--belt:#e8541a;--fill:rgba(18,48,74,.09);--ifill:rgba(232,84,26,.14);--bad:#c0392b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f2b4a;--grid:#1d4266;--panel:#123658;--ink:#e6f0fa;--mute:#93b0cb;--line:#2a5379;--belt:#ffa63d;--fill:rgba(230,240,250,.08);--ifill:rgba(255,166,61,.16);--bad:#ff8a7a}}
+:root[data-theme="dark"]{--paper:#0f2b4a;--grid:#1d4266;--panel:#123658;--ink:#e6f0fa;--mute:#93b0cb;--line:#2a5379;--belt:#ffa63d;--fill:rgba(230,240,250,.08);--ifill:rgba(255,166,61,.16);--bad:#ff8a7a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.4 "Barlow Semi Condensed",system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:1060px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font-size:22px;font-weight:700;margin:0;letter-spacing:.01em}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg label{margin:0;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;padding:6px 14px;font-weight:500;border-left:1.5px solid var(--ink)}
+.seg label:first-child span{border-left:0}
+.seg input:checked+span{background:var(--ink);color:var(--paper)}
+.seg input:focus-visible+span{outline:2px solid var(--belt);outline-offset:-4px}
+.grp{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grp>b{font-weight:500;color:var(--mute);font-size:14px}
+.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.layout{grid-template-columns:1fr}}
+.sheet{border:1.5px solid var(--ink);border-radius:4px;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;position:sticky;top:8px}
+svg{display:block;width:100%;height:auto;aspect-ratio:1/1}
+svg text{font:600 12px "Barlow Semi Condensed",system-ui,sans-serif;fill:var(--ink);text-anchor:middle;pointer-events:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.read{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin-bottom:12px}
+.read .big{grid-column:1/-1;border-bottom:1.5px solid var(--ink);padding-bottom:8px;margin-bottom:4px}
+.read small{display:block;color:var(--mute);font-size:14px}
+.read .big b{font-size:44px;line-height:1.05;font-weight:700;color:var(--belt)}
+.read b{font-size:24px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{font-weight:500;color:var(--mute);font-size:13px;text-align:left;padding:0 4px 6px}
+td{padding:10px 4px;border-top:1px solid var(--line)}
+svg{touch-action:none}
+svg path,svg line{pointer-events:none}
+.drag{cursor:grab}
+.dragging .drag{cursor:grabbing}
+td:first-child{font-weight:600;white-space:nowrap;padding-left:0}
+td input{width:100%;min-width:0;padding:5px 6px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);font:inherit}
+td input:focus,select:focus{outline:2px solid var(--belt);outline-offset:0}
+td.fixed{color:var(--mute);padding-left:10px}
+td.deg{color:var(--mute);text-align:right;white-space:nowrap}
+select{width:100%;margin-top:6px;padding:5px 6px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);font:inherit;font-size:14px}
+.wraprow td{border-top:0;padding-top:0;padding-bottom:12px}
+#err{color:var(--bad);min-height:1.3em;margin:10px 0 0;font-size:14px}
+.note{color:var(--mute);font-size:13px;margin:8px 0 0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>Belt drive sketch</h1>
+<div class="grp"><b>Idlers</b>
+<div class="seg" role="radiogroup" aria-label="Number of idlers">
+<label><input type="radio" name="n" value="0"><span>0</span></label>
+<label><input type="radio" name="n" value="1"><span>1</span></label>
+<label><input type="radio" name="n" value="2" checked><span>2</span></label>
+</div>
+<b>Travel</b>
+<div class="seg" role="radiogroup" aria-label="Belt direction">
+<label><input type="radio" name="dir" value="cw" checked><span>Clockwise</span></label>
+<label><input type="radio" name="dir" value="ccw"><span>Counter-clockwise</span></label>
+</div>
+</div>
+</header>
+
+<div class="layout">
+<div class="sheet"><svg id="svg" viewBox="0 0 100 100" role="img" aria-label="Belt layout"></svg></div>
+
+<div>
+<div class="card">
+<div class="read">
+<div class="big"><small>Belt length</small><b id="len">–</b></div>
+<div><small>Ratio (output : input)</small><b id="ratio">–</b></div>
+<div><small>Center distance</small><b id="cd">–</b></div>
+</div>
+<table>
+<thead><tr><th></th><th>Radius</th><th>X</th><th>Y</th><th style="text-align:right">Wrap</th></tr></thead>
+<tbody>
+<tr><td>Input</td><td><input type="number" id="r0" value="10" step="any" min="0" aria-label="Input radius"></td><td class="fixed">0</td><td class="fixed">0</td><td class="deg" id="a0"></td></tr>
+<tr><td>Output</td><td><input type="number" id="r1" value="20" step="any" min="0" aria-label="Output radius"></td><td><input type="number" id="x1" value="50" step="any" aria-label="Output X"></td><td><input type="number" id="y1" value="-20" step="any" aria-label="Output Y"></td><td class="deg" id="a1"></td></tr>
+<tr data-i="1"><td>Idler 1</td><td><input type="number" id="r2" value="5" step="any" min="0" aria-label="Idler 1 radius"></td><td><input type="number" id="x2" value="20" step="any" aria-label="Idler 1 X"></td><td><input type="number" id="y2" value="2" step="any" aria-label="Idler 1 Y"></td><td class="deg" id="a2"></td></tr>
+<tr data-i="1" class="wraprow"><td></td><td colspan="4"><select id="w2" aria-label="Idler 1 contact"><option value="out">Presses belt inward</option><option value="in">Belt wraps it like a pulley</option></select></td></tr>
+<tr data-i="2"><td>Idler 2</td><td><input type="number" id="r3" value="4" step="any" min="0" aria-label="Idler 2 radius"></td><td><input type="number" id="x3" value="25" step="any" aria-label="Idler 2 X"></td><td><input type="number" id="y3" value="-8" step="any" aria-label="Idler 2 Y"></td><td class="deg" id="a3"></td></tr>
+<tr data-i="2" class="wraprow"><td></td><td colspan="4"><select id="w3" aria-label="Idler 2 contact"><option value="out">Presses belt inward</option><option value="in">Belt wraps it like a pulley</option></select></td></tr>
+</tbody>
+</table>
+<div id="err" role="alert"></div>
+<p class="note">Drag the output pulley or either idler on the drawing to move it; the X and Y fields follow. Units are whatever you type in. The input pulley sits at the origin; wrap is the belt contact angle in degrees.</p>
+</div>
+</div>
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const TP = 2 * Math.PI;
+const mod = a => ((a % TP) + TP) % TP;
+const val = id => parseFloat($(id).value);
+let view = null, frozen = false;
+
+// seq items: {x, y, r, s, name, id}; s = +1 wraps counter-clockwise, -1 clockwise (y up)
+function solve(seq) {
+  const n = seq.length, segs = [];
+  for (let i = 0; i < n; i++) {
+    const a = seq[i], b = seq[(i + 1) % n];
+    const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy);
+    const k = b.s * b.r - a.s * a.r;
+    if (L < 1e-9) throw new Error("Two circles share the same center.");
+    if (Math.abs(k) > L) throw new Error("No belt line fits between " + a.name + " and " + b.name + ". One circle contains the other.");
+    segs.push({ th: Math.atan2(dy, dx) + Math.acos(k / L), len: Math.sqrt(L * L - k * k) });
+  }
+  let total = 0, d = "";
+  const arcs = [];
+  const pt = (c, th) => [c.x - c.s * c.r * Math.cos(th), -(c.y - c.s * c.r * Math.sin(th))]; // y flipped for screen
+  for (let i = 0; i < n; i++) {
+    const c = seq[i], inTh = segs[(i + n - 1) % n].th, outTh = segs[i].th;
+    const sw = c.s > 0 ? mod(outTh - inTh) : mod(inTh - outTh);
+    arcs.push(sw);
+    total += c.r * sw + segs[i].len;
+    const [ix, iy] = pt(c, inTh), [ox, oy] = pt(c, outTh);
+    // Points are already flipped for display, so a visually clockwise wrap (s < 0) is SVG sweep-flag 1.
+    d += (i ? "L" : "M") + ix + " " + iy + "A" + c.r + " " + c.r + " 0 " + (sw > Math.PI ? 1 : 0) + " " + (c.s < 0 ? 1 : 0) + " " + ox + " " + oy;
+  }
+  return { total, d: d + "Z", arcs };
+}
+
+function update() {
+  const count = +document.querySelector('input[name=n]:checked').value;
+  document.querySelectorAll("[data-i]").forEach(r => r.hidden = +r.dataset.i > count);
+  [0, 1, 2, 3].forEach(i => $("a" + i).textContent = "");
+  $("err").textContent = "";
+
+  const g = document.querySelector('input[name=dir]:checked').value === "cw" ? -1 : 1;
+  const P = (id, name, s) => ({ id, name, s, r: val("r" + id), x: id ? val("x" + id) : 0, y: id ? val("y" + id) : 0 });
+  const idl = i => P(i + 1, "idler " + i, $("w" + (i + 1)).value === "out" ? -g : g);
+  const input = P(0, "input", g), output = P(1, "output", g);
+  const seq = [input];
+  if (count >= 1) seq.push(idl(1));
+  seq.push(output);
+  if (count >= 2) seq.push(idl(2));
+
+  if (seq.some(c => !isFinite(c.r) || !isFinite(c.x) || !isFinite(c.y) || c.r <= 0)) {
+    $("len").textContent = $("ratio").textContent = $("cd").textContent = "–";
+    $("err").textContent = "Enter a positive radius and a number for every position.";
+    return;
+  }
+
+  const xs0 = Math.min(...seq.map(c => c.x - c.r)), xs1 = Math.max(...seq.map(c => c.x + c.r));
+  const ys0 = Math.min(...seq.map(c => -c.y - c.r)), ys1 = Math.max(...seq.map(c => -c.y + c.r));
+  if (!frozen) view = { cx: (xs0 + xs1) / 2, cy: (ys0 + ys1) / 2, size: Math.max(xs1 - xs0, ys1 - ys0) * 1.18 };
+  const size = view.size, svg = $("svg"), u = size / 100;
+  svg.setAttribute("viewBox", [view.cx - size / 2, view.cy - size / 2, size, size].join(" "));
+
+  let html = `<line x1="0" y1="0" x2="${output.x}" y2="${-output.y}" stroke="var(--mute)" stroke-width="${u * .25}" stroke-dasharray="${u * 2} ${u * .8} ${u * .4} ${u * .8}"/>`;
+  html += seq.map(c => {
+    const idler = c.name.startsWith("idler"), k = Math.min(c.r * .3, u * 2.5);
+    const label = c.name === "input" ? "Input" : c.name === "output" ? "Output" : "Idler " + c.name.slice(-1);
+    return `<circle ${c.id ? `class="drag" data-id="${c.id}" ` : ""}cx="${c.x}" cy="${-c.y}" r="${c.r}" fill="var(${idler ? "--ifill" : "--fill"})" stroke="var(--ink)" stroke-width="${u * .3}"/>` +
+      `<path d="M${c.x - k} ${-c.y}H${c.x + k}M${c.x} ${-c.y - k}V${-c.y + k}" stroke="var(--ink)" stroke-width="${u * .25}"/>` +
+      `<text x="${c.x}" y="${-c.y + k + Math.min(u * 3.2, c.r * .55)}" style="font-size:${Math.min(u * 3.2, c.r * .55)}px">${label}</text>`;
+  }).join("");
+
+  try {
+    const res = solve(seq);
+    html += `<path d="${res.d}" fill="none" stroke="var(--belt)" stroke-width="${u * .9}" stroke-linejoin="round" stroke-linecap="round"/>`;
+    $("len").textContent = res.total.toFixed(3);
+    $("cd").textContent = Math.hypot(output.x, output.y).toFixed(3);
+    seq.forEach((c, i) => $("a" + c.id).textContent = (res.arcs[i] * 180 / Math.PI).toFixed(1) + "°");
+  } catch (e) {
+    $("len").textContent = $("cd").textContent = "–";
+    $("err").textContent = e.message;
+  }
+  $("ratio").textContent = (output.r / input.r).toFixed(3) + " : 1";
+  svg.innerHTML = html;
+}
+
+document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", update));
+
+// Drag the output pulley or either idler; X/Y fields update live.
+const svgEl = $("svg");
+let dragId = null, off = { x: 0, y: 0 };
+const toMath = e => {
+  const p = svgEl.createSVGPoint();
+  p.x = e.clientX; p.y = e.clientY;
+  const q = p.matrixTransform(svgEl.getScreenCTM().inverse());
+  return { x: q.x, y: -q.y };
+};
+svgEl.addEventListener("pointerdown", e => {
+  const t = e.target.closest(".drag");
+  if (!t) return;
+  dragId = t.dataset.id;
+  const m = toMath(e);
+  off = { x: val("x" + dragId) - m.x, y: val("y" + dragId) - m.y };
+  frozen = true;
+  svgEl.classList.add("dragging");
+  svgEl.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+svgEl.addEventListener("pointermove", e => {
+  if (!dragId) return;
+  const m = toMath(e);
+  $("x" + dragId).value = +(m.x + off.x).toFixed(2);
+  $("y" + dragId).value = +(m.y + off.y).toFixed(2);
+  update();
+});
+const endDrag = () => {
+  if (!dragId) return;
+  dragId = null; frozen = false;
+  svgEl.classList.remove("dragging");
+  update();
+};
+svgEl.addEventListener("pointerup", endDrag);
+svgEl.addEventListener("pointercancel", endDrag);
+update();
+</script>
+</body>
+</html>
