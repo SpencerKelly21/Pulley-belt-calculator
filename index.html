@@ -7,12 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--paper:#eef3f7;--grid:#d2dde6;--panel:#fbfdff;--ink:#12304a;--mute:#5b7388;--line:#c5d2dd;--belt:#e8541a;--fill:rgba(18,48,74,.09);--ifill:rgba(232,84,26,.14);--bad:#c0392b;
+:root{--paper:#eef3f7;--sheet:#eef3f7;--grid:#d2dde6;--panel:#fbfdff;--ink:#12304a;--mute:#5b7388;--line:#c5d2dd;--belt:#e8541a;--fill:rgba(18,48,74,.09);--ifill:rgba(232,84,26,.14);--edge:#12304a;--label:#12304a;--bad:#c0392b;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f2b4a;--grid:#1d4266;--panel:#123658;--ink:#e6f0fa;--mute:#93b0cb;--line:#2a5379;--belt:#ffa63d;--fill:rgba(230,240,250,.08);--ifill:rgba(255,166,61,.16);--bad:#ff8a7a}}
-:root[data-theme="dark"]{--paper:#0f2b4a;--grid:#1d4266;--panel:#123658;--ink:#e6f0fa;--mute:#93b0cb;--line:#2a5379;--belt:#ffa63d;--fill:rgba(230,240,250,.08);--ifill:rgba(255,166,61,.16);--bad:#ff8a7a}
-*{box-sizing:border-box}
+:root[data-theme="blueprint"]{--paper:#0f2b4a;--sheet:#0f2b4a;--grid:#1d4266;--panel:#123658;--ink:#e6f0fa;--mute:#93b0cb;--line:#2a5379;--belt:#ffa63d;--fill:rgba(230,240,250,.08);--ifill:rgba(255,166,61,.16);--edge:#e6f0fa;--label:#e6f0fa;--bad:#ff8a7a}
+:root[data-theme="chalkboard"]{--paper:#10261f;--sheet:#173529;--grid:#25493a;--panel:#14302a;--ink:#eaf3ec;--mute:#9fbfaa;--line:#2c5041;--belt:#f4f1e6;--fill:rgba(255,255,255,.07);--ifill:rgba(250,204,21,.2);--edge:#eaf3ec;--label:#eaf3ec;--bad:#ffab9c}
+:root[data-theme="graphite"]{--paper:#1b1d21;--sheet:#23262b;--grid:#32363d;--panel:#25282d;--ink:#e9ecef;--mute:#9aa1a9;--line:#383c43;--belt:#3ddc97;--fill:rgba(255,255,255,.06);--ifill:rgba(61,220,151,.16);--edge:#e9ecef;--label:#e9ecef;--bad:#ff8a7a}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.4 "Barlow Semi Condensed",system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
 main{max-width:1060px;margin:0 auto;padding:16px}
 header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -28,9 +29,9 @@ h1{font-size:22px;font-weight:700;margin:0;letter-spacing:.01em}
 .grp>b{font-weight:500;color:var(--mute);font-size:14px}
 .layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:820px){.layout{grid-template-columns:1fr}}
-.sheet{border:1.5px solid var(--ink);border-radius:4px;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;position:sticky;top:8px}
+.sheet{border:1.5px solid var(--ink);border-radius:4px;background-color:var(--sheet);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;position:sticky;top:8px}
 svg{display:block;width:100%;height:auto;aspect-ratio:1/1}
-svg text{font:600 12px "Barlow Semi Condensed",system-ui,sans-serif;fill:var(--ink);text-anchor:middle;pointer-events:none}
+svg text{font:600 12px "Barlow Semi Condensed",system-ui,sans-serif;fill:var(--label);text-anchor:middle;pointer-events:none}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
 .read{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin-bottom:12px}
 .read .big{grid-column:1/-1;border-bottom:1.5px solid var(--ink);padding-bottom:8px;margin-bottom:4px}
@@ -41,7 +42,7 @@ table{width:100%;border-collapse:collapse}
 th{font-weight:500;color:var(--mute);font-size:13px;text-align:left;padding:0 4px 6px}
 td{padding:10px 4px;border-top:1px solid var(--line)}
 svg{touch-action:none}
-svg path,svg line{pointer-events:none}
+svg path,svg line,svg polygon{pointer-events:none}
 .drag{cursor:grab}
 .dragging .drag{cursor:grabbing}
 td:first-child{font-weight:600;white-space:nowrap;padding-left:0}
@@ -65,6 +66,13 @@ select{width:100%;margin-top:6px;padding:5px 6px;border:1px solid var(--line);bo
 <label><input type="radio" name="n" value="0"><span>0</span></label>
 <label><input type="radio" name="n" value="1"><span>1</span></label>
 <label><input type="radio" name="n" value="2" checked><span>2</span></label>
+</div>
+<b>Theme</b>
+<div class="seg" role="radiogroup" aria-label="Theme">
+<label><input type="radio" name="theme" value="drafting"><span>Drafting</span></label>
+<label><input type="radio" name="theme" value="blueprint"><span>Blueprint</span></label>
+<label><input type="radio" name="theme" value="chalkboard"><span>Chalkboard</span></label>
+<label><input type="radio" name="theme" value="graphite"><span>Graphite</span></label>
 </div>
 <b>Travel</b>
 <div class="seg" role="radiogroup" aria-label="Belt direction">
@@ -96,7 +104,7 @@ select{width:100%;margin-top:6px;padding:5px 6px;border:1px solid var(--line);bo
 </tbody>
 </table>
 <div id="err" role="alert"></div>
-<p class="note">Drag the output pulley or either idler on the drawing to move it; the X and Y fields follow. Units are whatever you type in. The input pulley sits at the origin; wrap is the belt contact angle in degrees.</p>
+<p class="note">Drag the output pulley or either idler on the drawing to move it; the arrows show each rotation direction; the X and Y fields follow. Units are whatever you type in. The input pulley sits at the origin; wrap is the belt contact angle in degrees.</p>
 </div>
 </div>
 </div>
@@ -164,11 +172,20 @@ function update() {
 
   let html = `<line x1="0" y1="0" x2="${output.x}" y2="${-output.y}" stroke="var(--mute)" stroke-width="${u * .25}" stroke-dasharray="${u * 2} ${u * .8} ${u * .4} ${u * .8}"/>`;
   html += seq.map(c => {
-    const idler = c.name.startsWith("idler"), k = Math.min(c.r * .3, u * 2.5);
-    const label = c.name === "input" ? "Input" : c.name === "output" ? "Output" : "Idler " + c.name.slice(-1);
-    return `<circle ${c.id ? `class="drag" data-id="${c.id}" ` : ""}cx="${c.x}" cy="${-c.y}" r="${c.r}" fill="var(${idler ? "--ifill" : "--fill"})" stroke="var(--ink)" stroke-width="${u * .3}"/>` +
-      `<path d="M${c.x - k} ${-c.y}H${c.x + k}M${c.x} ${-c.y - k}V${-c.y + k}" stroke="var(--ink)" stroke-width="${u * .25}"/>` +
-      `<text x="${c.x}" y="${-c.y + k + Math.min(u * 3.2, c.r * .55)}" style="font-size:${Math.min(u * 3.2, c.r * .55)}px">${label}</text>`;
+    const idler = c.name.startsWith("idler"), cy = -c.y;
+    const ra = Math.min(c.r * .45, u * 5), k = ra * .5, h = ra * .5;
+    const cw = c.s < 0, a0 = -150 * Math.PI / 180, a1 = a0 + (cw ? 1 : -1) * 1.5 * Math.PI;
+    const sx = c.x + ra * Math.cos(a0), sy = cy + ra * Math.sin(a0), ex = c.x + ra * Math.cos(a1), ey = cy + ra * Math.sin(a1);
+    const tx = cw ? -Math.sin(a1) : Math.sin(a1), ty = cw ? Math.cos(a1) : -Math.cos(a1);
+    const head = `${ex + tx * h},${ey + ty * h} ${ex - ty * h * .6},${ey + tx * h * .6} ${ex + ty * h * .6},${ey - tx * h * .6}`;
+    const fs = idler ? u * 2.8 : Math.min(u * 3.2, c.r * .5);
+    const label = c.name === "input" ? "Input" : c.name === "output" ? "Output" :c.name.slice(-1);
+    const ty2 = idler ? cy - c.r - u * .9 : cy + ra + fs * 1.3;
+    return `<circle ${c.id ? `class="drag" data-id="${c.id}" ` : ""}cx="${c.x}" cy="${cy}" r="${c.r}" fill="var(${idler ? "--ifill" : "--fill"})" stroke="var(--edge)" stroke-width="${u * .3}"/>` +
+      `<path d="M${c.x - k} ${cy}H${c.x + k}M${c.x} ${cy - k}V${cy + k}" stroke="var(--label)" stroke-width="${u * .2}"/>` +
+      `<path d="M${sx} ${sy}A${ra} ${ra} 0 1 ${cw ? 1 : 0} ${ex} ${ey}" fill="none" stroke="var(--label)" stroke-width="${u * .3}" stroke-linecap="round"/>` +
+      `<polygon points="${head}" fill="var(--label)"/>` +
+      `<text x="${c.x}" y="${ty2}" style="font-size:${fs}px">${label}</text>`;
   }).join("");
 
   try {
@@ -186,6 +203,18 @@ function update() {
 }
 
 document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", update));
+
+// Themes (remembered between visits when storage is available)
+const themes = ["drafting", "blueprint", "chalkboard", "graphite"];
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.querySelector('input[name=theme][value=' + t + ']').checked = true;
+  try { localStorage.setItem("beltTheme", t); } catch (e) {}
+}
+let savedTheme = null;
+try { savedTheme = localStorage.getItem("beltTheme"); } catch (e) {}
+setTheme(themes.includes(savedTheme) ? savedTheme : (matchMedia("(prefers-color-scheme: dark)").matches ? "blueprint" : "drafting"));
+document.querySelectorAll('input[name=theme]').forEach(r => r.addEventListener("change", () => setTheme(r.value)));
 
 // Drag the output pulley or either idler; X/Y fields update live.
 const svgEl = $("svg");
